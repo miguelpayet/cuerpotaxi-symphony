@@ -1,0 +1,14 @@
+manifest/
+workspace/css/images/
+workspace/images/
+*.gif
+*.ico
+*.bmp
+*.jpg
+*.png
+*.swf
+flash/
+descargas/
+*.pdf
+.idea/
+

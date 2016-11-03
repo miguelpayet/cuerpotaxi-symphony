@@ -1,0 +1,43 @@
+.contenido {
+margin:30px 0 40px;
+}
+
+.fecha {
+font-size:12px;
+}
+
+.id {
+font-size:12px;
+margin:30px 0 20px;
+}
+
+.pie {
+border-top:1px solid #ddd;
+width:100%;
+}
+
+h1 {
+font-size:24px;
+font-weight:700;
+}
+
+h2 {
+font-size:22px;
+font-weight:700;
+}
+
+h3 {
+font-size:20px;
+font-weight:700;
+}
+
+h4 {
+font-size:18px;
+font-weight:700;
+}
+
+html {
+font-family:Helvetica, Arial, sans-serif;
+font-size:16px;
+font-weight:400;
+}
