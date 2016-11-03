@@ -1,13 +1,13 @@
--- MySQL dump 10.13  Distrib 5.6.26, for osx10.8 (x86_64)
+-- MySQL dump 10.15  Distrib 10.0.27-MariaDB, for debian-linux-gnu (x86_64)
 --
 -- Host: localhost    Database: cuerpotaxi
 -- ------------------------------------------------------
--- Server version	5.6.26-log
+-- Server version	10.0.27-MariaDB-0ubuntu0.16.04.1
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8 */;
+/*!40101 SET NAMES utf8mb4 */;
 /*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
 /*!40103 SET TIME_ZONE='+00:00' */;
 /*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
@@ -47,7 +47,7 @@ CREATE TABLE `sym_authors` (
 
 LOCK TABLES `sym_authors` WRITE;
 /*!40000 ALTER TABLE `sym_authors` DISABLE KEYS */;
-INSERT INTO `sym_authors` VALUES (1,'admin','PBKDF2v1|10000|cdb9e5571e92620a5eb6|ijWZ0ehPmQZG3vC0vWZTZbDZV/i+s3rfyLiJ0RZqbXDefmNnTwg28A==','Miguel','Payet','miguelpayet@gmail.com','2016-11-02 22:08:23','developer','yes',NULL,'no',NULL);
+INSERT INTO `sym_authors` VALUES (1,'admin','PBKDF2v1|10000|cdb9e5571e92620a5eb6|ijWZ0ehPmQZG3vC0vWZTZbDZV/i+s3rfyLiJ0RZqbXDefmNnTwg28A==','Miguel','Payet','miguelpayet@gmail.com','2016-11-03 13:38:09','developer','yes',NULL,'no',NULL);
 /*!40000 ALTER TABLE `sym_authors` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -102,7 +102,7 @@ CREATE TABLE `sym_entries` (
   KEY `creation_date_gmt` (`creation_date_gmt`),
   KEY `modification_date` (`modification_date`),
   KEY `modification_date_gmt` (`modification_date_gmt`)
-) ENGINE=MyISAM AUTO_INCREMENT=298 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=300 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -111,6 +111,7 @@ CREATE TABLE `sym_entries` (
 
 LOCK TABLES `sym_entries` WRITE;
 /*!40000 ALTER TABLE `sym_entries` DISABLE KEYS */;
+INSERT INTO `sym_entries` VALUES (298,1,1,'2016-11-03 08:51:05','2016-11-03 13:51:05','2016-11-03 08:51:05','2016-11-03 13:51:05'),(299,1,1,'2016-11-03 12:50:10','2016-11-03 17:50:10','2016-11-03 12:50:10','2016-11-03 17:50:10');
 /*!40000 ALTER TABLE `sym_entries` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -130,7 +131,7 @@ CREATE TABLE `sym_entries_data_1` (
   UNIQUE KEY `entry_id` (`entry_id`),
   KEY `handle` (`handle`),
   KEY `value` (`value`)
-) ENGINE=MyISAM AUTO_INCREMENT=641 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=643 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -139,6 +140,7 @@ CREATE TABLE `sym_entries_data_1` (
 
 LOCK TABLES `sym_entries_data_1` WRITE;
 /*!40000 ALTER TABLE `sym_entries_data_1` DISABLE KEYS */;
+INSERT INTO `sym_entries_data_1` VALUES (641,298,'hola','hola'),(642,299,'floripondio','floripondio');
 /*!40000 ALTER TABLE `sym_entries_data_1` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -157,7 +159,7 @@ CREATE TABLE `sym_entries_data_2` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `entry_id` (`entry_id`),
   FULLTEXT KEY `value` (`value`)
-) ENGINE=MyISAM AUTO_INCREMENT=638 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=639 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -166,6 +168,7 @@ CREATE TABLE `sym_entries_data_2` (
 
 LOCK TABLES `sym_entries_data_2` WRITE;
 /*!40000 ALTER TABLE `sym_entries_data_2` DISABLE KEYS */;
+INSERT INTO `sym_entries_data_2` VALUES (638,298,'hola','<p>hola</p>\n');
 /*!40000 ALTER TABLE `sym_entries_data_2` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -187,7 +190,7 @@ CREATE TABLE `sym_entries_data_4` (
   UNIQUE KEY `entry_id` (`entry_id`),
   KEY `file` (`file`),
   KEY `mimetype` (`mimetype`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -196,6 +199,7 @@ CREATE TABLE `sym_entries_data_4` (
 
 LOCK TABLES `sym_entries_data_4` WRITE;
 /*!40000 ALTER TABLE `sym_entries_data_4` DISABLE KEYS */;
+INSERT INTO `sym_entries_data_4` VALUES (1,299,'dsc_3685.jpeg',104257,'image/jpeg','a:3:{s:8:\"creation\";s:25:\"2016-11-03T12:50:10-05:00\";s:5:\"width\";i:640;s:6:\"height\";i:427;}');
 /*!40000 ALTER TABLE `sym_entries_data_4` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -254,7 +258,7 @@ CREATE TABLE `sym_extensions` (
 
 LOCK TABLES `sym_extensions` WRITE;
 /*!40000 ALTER TABLE `sym_extensions` DISABLE KEYS */;
-INSERT INTO `sym_extensions` VALUES (1,'debugdevkit','enabled','1.3.3'),(2,'export_ensemble','enabled','2.2.0'),(3,'jit_image_manipulation','enabled','1.44'),(4,'maintenance_mode','enabled','1.9.1'),(5,'markdown','enabled','1.21'),(6,'profiledevkit','enabled','1.5.2'),(7,'selectbox_link_field','enabled','1.34'),(8,'xssfilter','enabled','1.4.2'),(9,'order_entries','enabled','2.2.1'),(10,'oembed_field','enabled','1.9.0');
+INSERT INTO `sym_extensions` VALUES (1,'debugdevkit','enabled','1.3.3'),(2,'export_ensemble','enabled','2.2.0'),(3,'jit_image_manipulation','enabled','1.44'),(4,'maintenance_mode','enabled','1.9.1'),(5,'markdown','enabled','1.21'),(6,'profiledevkit','enabled','1.5.2'),(7,'selectbox_link_field','enabled','1.34'),(8,'xssfilter','enabled','1.4.2'),(9,'order_entries','enabled','2.2.1'),(10,'oembed_field','enabled','1.10.0');
 /*!40000 ALTER TABLE `sym_extensions` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -275,7 +279,7 @@ CREATE TABLE `sym_extensions_delegates` (
   KEY `extension_id` (`extension_id`),
   KEY `page` (`page`),
   KEY `delegate` (`delegate`)
-) ENGINE=MyISAM AUTO_INCREMENT=41 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=43 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -284,7 +288,7 @@ CREATE TABLE `sym_extensions_delegates` (
 
 LOCK TABLES `sym_extensions_delegates` WRITE;
 /*!40000 ALTER TABLE `sym_extensions_delegates` DISABLE KEYS */;
-INSERT INTO `sym_extensions_delegates` VALUES (1,1,'/frontend/','FrontendDevKitResolve','frontendDevKitResolve'),(2,1,'/frontend/','ManipulateDevKitNavigation','manipulateDevKitNavigation'),(24,2,'/system/preferences/','AddCustomPreferenceFieldsets','appendPreferences'),(25,3,'/system/preferences/','AddCustomPreferenceFieldsets','appendPreferences'),(31,4,'/blueprints/pages/','AppendPageContent','__appendType'),(30,4,'/backend/','AppendPageAlert','__appendAlert'),(29,4,'/system/preferences/','CustomActions','__toggleMaintenanceMode'),(28,4,'/system/preferences/','Save','__SavePreferences'),(27,4,'/system/preferences/','AddCustomPreferenceFieldsets','appendPreferences'),(13,6,'/frontend/','FrontendDevKitResolve','frontendDevKitResolve'),(14,6,'/frontend/','ManipulateDevKitNavigation','manipulateDevKitNavigation'),(37,8,'/frontend/','EventPreSaveFilter','eventPreSaveFilter'),(36,8,'/blueprints/events/edit/','AppendEventFilter','appendEventFilter'),(35,8,'/blueprints/events/new/','AppendEventFilter','appendEventFilter'),(34,8,'/blueprints/events/','AppendEventFilterDocumentation','appendEventFilterDocumentation'),(20,9,'/backend/','InitaliseAdminPageHead','prepareIndex'),(21,9,'/backend/','AdminPagePreGenerate','adjustTable'),(22,9,'/backend/','AdminPagePostGenerate','resetPagination'),(23,9,'/frontend/','DataSourcePreExecute','saveFilterContext'),(26,3,'/system/preferences/','Save','__SavePreferences'),(32,4,'/frontend/','FrontendPrePageResolve','__checkForMaintenanceMode'),(33,4,'/frontend/','FrontendParamsResolve','__addParam'),(38,8,'/frontend/','FrontendParamsResolve','frontendParamsResolve'),(39,10,'/backend/','InitaliseAdminPageHead','appendJS'),(40,10,'*','AppendContentType','appendContentType');
+INSERT INTO `sym_extensions_delegates` VALUES (1,1,'/frontend/','FrontendDevKitResolve','frontendDevKitResolve'),(2,1,'/frontend/','ManipulateDevKitNavigation','manipulateDevKitNavigation'),(24,2,'/system/preferences/','AddCustomPreferenceFieldsets','appendPreferences'),(25,3,'/system/preferences/','AddCustomPreferenceFieldsets','appendPreferences'),(31,4,'/blueprints/pages/','AppendPageContent','__appendType'),(30,4,'/backend/','AppendPageAlert','__appendAlert'),(29,4,'/system/preferences/','CustomActions','__toggleMaintenanceMode'),(28,4,'/system/preferences/','Save','__SavePreferences'),(27,4,'/system/preferences/','AddCustomPreferenceFieldsets','appendPreferences'),(13,6,'/frontend/','FrontendDevKitResolve','frontendDevKitResolve'),(14,6,'/frontend/','ManipulateDevKitNavigation','manipulateDevKitNavigation'),(37,8,'/frontend/','EventPreSaveFilter','eventPreSaveFilter'),(36,8,'/blueprints/events/edit/','AppendEventFilter','appendEventFilter'),(35,8,'/blueprints/events/new/','AppendEventFilter','appendEventFilter'),(34,8,'/blueprints/events/','AppendEventFilterDocumentation','appendEventFilterDocumentation'),(20,9,'/backend/','InitaliseAdminPageHead','prepareIndex'),(21,9,'/backend/','AdminPagePreGenerate','adjustTable'),(22,9,'/backend/','AdminPagePostGenerate','resetPagination'),(23,9,'/frontend/','DataSourcePreExecute','saveFilterContext'),(26,3,'/system/preferences/','Save','__SavePreferences'),(32,4,'/frontend/','FrontendPrePageResolve','__checkForMaintenanceMode'),(33,4,'/frontend/','FrontendParamsResolve','__addParam'),(38,8,'/frontend/','FrontendParamsResolve','frontendParamsResolve'),(41,10,'/backend/','InitaliseAdminPageHead','appendJS'),(42,10,'*','AppendContentType','appendContentType');
 /*!40000 ALTER TABLE `sym_extensions_delegates` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -316,7 +320,7 @@ CREATE TABLE `sym_fields` (
 
 LOCK TABLES `sym_fields` WRITE;
 /*!40000 ALTER TABLE `sym_fields` DISABLE KEYS */;
-INSERT INTO `sym_fields` VALUES (1,'titulo','titulo','input',1,'yes',0,'main','yes'),(2,'texto','texto','textarea',1,'yes',1,'main','no'),(4,'imagen','imagen','upload',1,'no',2,'sidebar','yes'),(5,'video','video','oembed',1,'no',3,'main','no');
+INSERT INTO `sym_fields` VALUES (1,'titulo','titulo','input',1,'yes',0,'main','yes'),(2,'texto','texto','textarea',1,'no',1,'main','no'),(4,'imagen','imagen','upload',1,'no',2,'main','yes'),(5,'video','video','oembed',1,'no',3,'main','no');
 /*!40000 ALTER TABLE `sym_fields` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -413,7 +417,7 @@ CREATE TABLE `sym_fields_input` (
   `validator` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `field_id` (`field_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=8 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=10 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -422,7 +426,7 @@ CREATE TABLE `sym_fields_input` (
 
 LOCK TABLES `sym_fields_input` WRITE;
 /*!40000 ALTER TABLE `sym_fields_input` DISABLE KEYS */;
-INSERT INTO `sym_fields_input` VALUES (7,1,NULL);
+INSERT INTO `sym_fields_input` VALUES (9,1,NULL);
 /*!40000 ALTER TABLE `sym_fields_input` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -445,7 +449,7 @@ CREATE TABLE `sym_fields_oembed` (
   `unique_media` enum('yes','no') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'no',
   PRIMARY KEY (`id`),
   UNIQUE KEY `field_id` (`field_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=4 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -454,7 +458,7 @@ CREATE TABLE `sym_fields_oembed` (
 
 LOCK TABLES `sym_fields_oembed` WRITE;
 /*!40000 ALTER TABLE `sym_fields_oembed` DISABLE KEYS */;
-INSERT INTO `sym_fields_oembed` VALUES (1,5,NULL,'Twitter,Vimeo,YouTube','no','yes',NULL,'no','no');
+INSERT INTO `sym_fields_oembed` VALUES (3,5,NULL,'Twitter,Vimeo,YouTube','no','yes',NULL,'no','no');
 /*!40000 ALTER TABLE `sym_fields_oembed` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -583,7 +587,7 @@ CREATE TABLE `sym_fields_textarea` (
   `size` int(3) unsigned NOT NULL,
   PRIMARY KEY (`id`),
   KEY `field_id` (`field_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=8 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=10 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -592,7 +596,7 @@ CREATE TABLE `sym_fields_textarea` (
 
 LOCK TABLES `sym_fields_textarea` WRITE;
 /*!40000 ALTER TABLE `sym_fields_textarea` DISABLE KEYS */;
-INSERT INTO `sym_fields_textarea` VALUES (7,2,'markdown',15);
+INSERT INTO `sym_fields_textarea` VALUES (9,2,'markdown',15);
 /*!40000 ALTER TABLE `sym_fields_textarea` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -610,7 +614,7 @@ CREATE TABLE `sym_fields_upload` (
   `validator` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `field_id` (`field_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=5 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=7 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -619,7 +623,7 @@ CREATE TABLE `sym_fields_upload` (
 
 LOCK TABLES `sym_fields_upload` WRITE;
 /*!40000 ALTER TABLE `sym_fields_upload` DISABLE KEYS */;
-INSERT INTO `sym_fields_upload` VALUES (4,4,'/workspace/images','/\\.(?:bmp|gif|jpe?g|png)$/i');
+INSERT INTO `sym_fields_upload` VALUES (6,4,'/workspace','/\\.(?:bmp|gif|jpe?g|png)$/i');
 /*!40000 ALTER TABLE `sym_fields_upload` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -787,7 +791,7 @@ CREATE TABLE `sym_sessions` (
 
 LOCK TABLES `sym_sessions` WRITE;
 /*!40000 ALTER TABLE `sym_sessions` DISABLE KEYS */;
-INSERT INTO `sym_sessions` VALUES ('gnd7olo0ogsoo7o3dind0q5523',1478142503,'sym-|a:3:{s:10:\"xsrf-token\";s:27:\"xYvf6jv2OLaJGQtq8ALgvNeUX88\";s:8:\"username\";s:5:\"admin\";s:4:\"pass\";s:92:\"PBKDF2v1|10000|cdb9e5571e92620a5eb6|ijWZ0ehPmQZG3vC0vWZTZbDZV/i+s3rfyLiJ0RZqbXDefmNnTwg28A==\";}');
+INSERT INTO `sym_sessions` VALUES ('gnd7olo0ogsoo7o3dind0q5523',1478142503,'sym-|a:3:{s:10:\"xsrf-token\";s:27:\"xYvf6jv2OLaJGQtq8ALgvNeUX88\";s:8:\"username\";s:5:\"admin\";s:4:\"pass\";s:92:\"PBKDF2v1|10000|cdb9e5571e92620a5eb6|ijWZ0ehPmQZG3vC0vWZTZbDZV/i+s3rfyLiJ0RZqbXDefmNnTwg28A==\";}'),('pbgqb0cut2oinhhhsm7pnhdpt4',1478198289,'sym-|a:3:{s:10:\"xsrf-token\";s:27:\"kAGdjGDmGrmYW5jfrg3oL9R0Fn8\";s:8:\"username\";s:5:\"admin\";s:4:\"pass\";s:92:\"PBKDF2v1|10000|cdb9e5571e92620a5eb6|ijWZ0ehPmQZG3vC0vWZTZbDZV/i+s3rfyLiJ0RZqbXDefmNnTwg28A==\";}');
 /*!40000 ALTER TABLE `sym_sessions` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -800,4 +804,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2016-11-02 22:08:37
+-- Dump completed on 2016-11-03 13:39:42
