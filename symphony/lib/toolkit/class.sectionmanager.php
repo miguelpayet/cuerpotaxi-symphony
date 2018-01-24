@@ -8,7 +8,6 @@
  * installation by exposing basic CRUD operations. Sections are stored in the
  * database in `tbl_sections`.
  */
-include_once TOOLKIT . '/class.section.php';
 
 class SectionManager
 {
@@ -35,6 +34,12 @@ class SectionManager
      */
     public static function add(array $settings)
     {
+        $defaults = array();
+        $defaults['creation_date'] = $defaults['modification_date'] = DateTimeObj::get('Y-m-d H:i:s');
+        $defaults['creation_date_gmt'] = $defaults['modification_date_gmt'] = DateTimeObj::getGMT('Y-m-d H:i:s');
+        $defaults['author_id'] = 1;
+        $defaults['modification_author_id'] = 1;
+        $settings = array_replace($defaults, $settings);
         if (!Symphony::Database()->insert($settings, 'tbl_sections')) {
             return false;
         }
@@ -58,6 +63,12 @@ class SectionManager
      */
     public static function edit($section_id, array $settings)
     {
+        $defaults = array();
+        $defaults['modification_date'] = DateTimeObj::get('Y-m-d H:i:s');
+        $defaults['modification_date_gmt'] = DateTimeObj::getGMT('Y-m-d H:i:s');
+        $defaults['author_id'] = 1;
+        $defaults['modification_author_id'] = 1;
+        $settings = array_replace($defaults, $settings);
         if (!Symphony::Database()->update($settings, 'tbl_sections', sprintf(" `id` = %d", $section_id))) {
             return false;
         }
@@ -84,7 +95,6 @@ class SectionManager
         ));
 
         // Delete all the entries
-        include_once TOOLKIT . '/class.entrymanager.php';
         $entries = Symphony::Database()->fetchCol('id', "SELECT `id` FROM `tbl_entries` WHERE `section_id` = '$section_id'");
         EntryManager::delete($entries);
 
@@ -177,6 +187,14 @@ class SectionManager
 
             foreach ($s as $name => $value) {
                 $obj->set($name, $value);
+            }
+
+            $obj->set('creation_date', DateTimeObj::get('c', $obj->get('creation_date')));
+
+            if (!empty($obj->get('modification_date'))) {
+                $obj->set('modification_date', DateTimeObj::get('c', $obj->get('modification_date')));
+            } else {
+                $obj->set('modification_date', $obj->get('creation_date'));
             }
 
             self::$_pool[$obj->get('id')] = $obj;
@@ -338,6 +356,9 @@ class SectionManager
      */
     public static function fetchAssociatedSections($section_id, $respect_visibility = false)
     {
+        if (Symphony::Log()) {
+            Symphony::Log()->pushDeprecateWarningToLog('SectionManager::fetchAssociatedSections()', 'SectionManager::fetchChildAssociations()');
+        }
         self::fetchChildAssociations($section_id, $respect_visibility);
     }
 

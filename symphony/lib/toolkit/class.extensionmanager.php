@@ -6,12 +6,9 @@
 /**
  * The ExtensionManager class is responsible for managing all extensions
  * in Symphony. Extensions are stored on the file system in the `EXTENSIONS`
- * folder. They are autodiscovered where the Extension class name is the same
+ * folder. They are auto-discovered where the Extension class name is the same
  * as it's folder name (excluding the extension prefix).
  */
-
-include_once FACE . '/interface.fileresource.php';
-include_once TOOLKIT . '/class.extension.php';
 
 class ExtensionManager implements FileResource
 {
@@ -572,7 +569,6 @@ class ExtensionManager implements FileResource
      *  An extension object
      * @throws SymphonyErrorPage
      * @throws Exception
-     * @return boolean
      */
     private static function __canUninstallOrDisable(Extension $obj)
     {
@@ -965,7 +961,7 @@ class ExtensionManager implements FileResource
 
                 // Remove pre-release notes from the current Symphony version so that
                 // we don't get false erros in the backend
-                $current_symphony_version = preg_replace(array('/dev/i', '/-?beta\.?\d/i', '/-?rc\.?\d/i', '/.0/i'), '', $current_symphony_version);
+                $current_symphony_version = preg_replace(array('/dev/i', '/-?beta\.?\d/i', '/-?rc\.?\d/i', '/\.0(?:\.0)?$/'), '', $current_symphony_version);
 
                 // Munge the version number so that it makes sense in the backend.
                 // Consider, 2.3.x. As the min version, this means 2.3 onwards,
@@ -1027,7 +1023,7 @@ class ExtensionManager implements FileResource
                 Symphony::Engine()->throwCustomError(
                     __('Could not find extension %s at location %s.', array(
                         '<code>' . $name . '</code>',
-                        '<code>' . $path . '</code>'
+                        '<code>' . str_replace(DOCROOT . '/', '', $path) . '</code>'
                     )),
                     __('Symphony Extension Missing Error'),
                     Page::HTTP_STATUS_ERROR,

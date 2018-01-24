@@ -2,15 +2,20 @@
 
 	@ini_set('display_errors', 'off');
 	@ini_set("gd.jpeg_ignore_warning", 1);
+	@ini_set('magic_quotes_runtime', false);
+
+    // Set appropriate error reporting:
+    error_reporting(E_ALL & ~E_NOTICE & ~E_DEPRECATED & ~E_STRICT);
 
 	define('DOCROOT', rtrim(realpath(dirname(__FILE__) . '/../../../'), '/'));
 	define('DOMAIN', rtrim(rtrim($_SERVER['HTTP_HOST'], '/') . str_replace('/extensions/jit_image_manipulation/lib', NULL, dirname($_SERVER['PHP_SELF'])), '/'));
 
 	// Include some parts of the engine
 	require_once DOCROOT . '/vendor/autoload.php';
-	require_once DOCROOT . '/symphony/lib/boot/bundle.php';
 	require_once 'class.image.php';
 	require_once CONFIG;
+
+	Symphony::initialiseConfiguration($settings);
 
 	// Setup the environment
 	if(method_exists('DateTimeObj', 'setSettings')) {
@@ -168,10 +173,10 @@
 	function __errorHandler($errno=NULL, $errstr, $errfile=NULL, $errline=NULL, $errcontext=NULL){
 		global $param;
 
-		if(error_reporting() != 0 && in_array($errno, array(E_WARNING, E_USER_WARNING, E_ERROR, E_USER_ERROR))){
-			$Log = new Log(ACTIVITY_LOG);
-			$Log->pushToLog("{$errno} - ".strip_tags((is_object($errstr) ? $errstr->generate() : $errstr)).($errfile ? " in file {$errfile}" : '') . ($errline ? " on line {$errline}" : ''), $errno, true);
-			$Log->pushToLog(
+		if(error_reporting() != 0 && in_array($errno, array(E_WARNING, E_USER_WARNING, E_ERROR, E_USER_ERROR))) {
+			Symphony::initialiseLog();
+			Symphony::Log()->pushToLog("{$errno} - ".strip_tags((is_object($errstr) ? $errstr->generate() : $errstr)).($errfile ? " in file {$errfile}" : '') . ($errline ? " on line {$errline}" : ''), $errno, true);
+			Symphony::Log()->pushToLog(
 				sprintf(
 					'Image class param dump - mode: %d, width: %d, height: %d, position: %d, background: %d, file: %s, external: %d, raw input: %s',
 					$param->mode,
@@ -181,7 +186,7 @@
 					$param->background,
 					$param->file,
 					(bool)$param->external,
-					$_GET['param']
+					General::sanitize($_GET['param'])
 				), E_NOTICE, true
 			);
 		}
@@ -242,15 +247,17 @@
 	if($last_modified) {
 		$last_modified_gmt = gmdate('D, d M Y H:i:s', $last_modified) . ' GMT';
 		$etag = md5($last_modified . $image_path);
-		$cacheControl = 'public';
-		
+		// Use configured max-age or fallback on 3 days (See #88)
+		$maxage = isset($settings['image']['max-age']) ? $settings['image']['max-age'] : 86400;
+		$cacheControl = 'public; max-age=' . $maxage;
+
 		// Add no-transform in order to prevent ISPs to
 		// serve image over http through a compressing proxy
 		// See #79
 		if ($settings['image']['disable_proxy_transform'] == 'yes') {
 			$cacheControl .= ', no-transform';
 		}
-		
+
 		header('Last-Modified: ' . $last_modified_gmt);
 		header(sprintf('ETag: "%s"', $etag));
 		header('Cache-Control: '. $cacheControl);
@@ -258,6 +265,25 @@
 	else {
 		$last_modified_gmt = NULL;
 		$etag = NULL;
+	}
+
+	// Allow CORS
+	// respond to preflights
+	if ($settings['image']['allow_origin'] !== null) {
+		if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
+			// return only the headers and not the content
+			// only allow CORS if we're doing a GET - i.e. no sending for now.
+			if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_METHOD']) && $_SERVER['HTTP_ACCESS_CONTROL_REQUEST_METHOD'] == 'GET') {
+				header('Access-Control-Allow-Origin: *');
+				header('Access-Control-Allow-Headers: X-Requested-With');
+			}
+			exit;
+		} else {
+			header('Origin: ' . $settings['image']['allow_origin']);
+			header('Access-Control-Allow-Origin: ' . $settings['image']['allow_origin']);
+			header('Access-Control-Allow-Methods: GET');
+			header('Access-Control-Max-Age: 3000');
+		}
 	}
 
 	// Check to see if the requested image needs to be generated or if a 304
@@ -299,8 +325,9 @@
 		) {
 			// Guess not, return 404.
 			Page::renderStatusCode(Page::HTTP_STATUS_NOT_FOUND);
-			trigger_error(sprintf('Image <code>%s</code> could not be found.', str_replace(DOCROOT, '', $original_file)), E_USER_ERROR);
-			echo sprintf('Image <code>%s</code> could not be found.', str_replace(DOCROOT, '', $original_file));
+			$safeOriginalFile = General::sanitize(str_replace(DOCROOT, '', $original_file));
+			trigger_error(sprintf('Image <code>%s</code> could not be found.', $safeOriginalFile, E_USER_ERROR));
+			echo sprintf('Image <code>%s</code> could not be found.', $safeOriginalFile);
 			exit;
 		}
 		$meta = Image::getMetaInformation($image_path);

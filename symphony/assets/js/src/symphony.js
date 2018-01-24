@@ -1,5 +1,5 @@
 /*!
- * Symphony 2.6.x, http://getsymphony.com, MIT license
+ * Symphony 2.7.x, https://www.getsymphony.com, MIT license
  */
 
 /**
@@ -227,7 +227,7 @@ var Symphony = (function($, crossroads) {
 				}
 
 				// Return false if group does not exist in Storage
-				if(typeof Storage.Context[group] === undefined) {
+				if(typeof Storage.Context[group] === 'undefined') {
 					return false;
 				}
 

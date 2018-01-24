@@ -515,7 +515,7 @@ class MySQL
      *  is not either of these, it will return objects.
      * @throws DatabaseException
      * @return boolean
-     *  True if the query executed without errors, false otherwise
+     *  true if the query executed without errors, false otherwise
      */
     public function query($query, $type = "OBJECT")
     {
@@ -738,7 +738,7 @@ class MySQL
      */
     public function delete($table, $where = null)
     {
-        $sql = "DELETE FROM $table";
+        $sql = "DELETE FROM `$table`";
 
         if (!is_null($where)) {
             $sql .= " WHERE $where";
@@ -872,18 +872,20 @@ class MySQL
      * if the `$table` contains the `$field`.
      *
      * @since Symphony 2.3
+     * @link  https://dev.mysql.com/doc/refman/en/describe.html
      * @param string $table
      *  The table name
      * @param string $field
      *  The field name
      * @throws DatabaseException
      * @return boolean
-     *  True if `$table` contains `$field`, false otherwise
+     *  true if `$table` contains `$field`, false otherwise
      */
     public function tableContainsField($table, $field)
     {
+        $table = MySQL::cleanValue($table);
+        $field = MySQL::cleanValue($field);
         $results = $this->fetch("DESC `{$table}` `{$field}`");
-
         return (is_array($results) && !empty($results));
     }
 
@@ -892,16 +894,17 @@ class MySQL
      * if it exists or not.
      *
      * @since Symphony 2.3.4
+     * @link  https://dev.mysql.com/doc/refman/en/show-tables.html
      * @param string $table
      *  The table name
      * @throws DatabaseException
      * @return boolean
-     *  True if `$table` exists, false otherwise
+     *  true if `$table` exists, false otherwise
      */
     public function tableExists($table)
     {
+        $table = MySQL::cleanValue($table);
         $results = $this->fetch(sprintf("SHOW TABLES LIKE '%s'", $table));
-
         return (is_array($results) && !empty($results));
     }
 
@@ -1036,7 +1039,7 @@ class MySQL
     {
         if ($force_engine) {
             // Silently attempt to change the storage engine. This prevents INNOdb errors.
-            $this->query('SET storage_engine=MYISAM');
+            $this->query('SET default_storage_engine = MYISAM');
         }
 
         $queries = preg_split('/;[\\r\\n]+/', $sql, -1, PREG_SPLIT_NO_EMPTY);

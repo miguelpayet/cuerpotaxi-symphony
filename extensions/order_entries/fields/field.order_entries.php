@@ -40,27 +40,17 @@
 		function processRawFieldData($data, &$status, &$message = null, $simulate = false, $entry_id = null) {
 			$status = self::__OK__;
 			$increment_subsequent_order = false;
-
-			$filters = Symphony::Database()->fetchCol('Field',"SHOW COLUMNS FROM tbl_entries_data_{$this->get('id')} WHERE Field like 'field_%';");
-			// for now if there are any filters completely ignore any override.
-			if (!empty($filters)){
-				$filterString = implode(',', $filters);
-				$current_values = Symphony::Database()->fetch("
-					SELECT value, {$filterString}
-					FROM tbl_entries_data_{$this->get('id')}
-					WHERE entry_id=".$entry_id."
-				");
-				$result= array();
-				foreach ($current_values as $key => $row) {
-					foreach ($row as $col => $value) {
-						$result[$col][$key] = $value;
-					}
-				}
-				return $result;
+			
+			if ($entry_id != null) {
+				$entry_id = General::intval($entry_id);
 			}
 
-			if($entry_id) {
+			if (is_array($data)){
+				//TODO Auto Increment for filtered ordering for now just return the data as it is already properly formatted
+				return $data;
+			} 
 
+			if($entry_id) {
 				$new_value = $data;
 				$current_value = Symphony::Database()->fetchVar("value", 0, "
 					SELECT value
@@ -110,7 +100,7 @@
 			return $groups;
 		}
 
-		function displaySettingsPanel(&$wrapper, $errors = null) {
+		function displaySettingsPanel(XMLElement &$wrapper, $errors = null) {
 			parent::displaySettingsPanel($wrapper, $errors);
 
 			$order = $this->get('sortorder');
@@ -196,7 +186,10 @@
 					))
 				);
 
+				$text = new XMLElement('p', __('Filtered Ordering is an advanced use case for Order Entries. Refer to the readme for further details. Do not select any field unless you understand what it entails as it might lead to unexpected results.'), array('class' => 'help'));
+
 				$fieldset->appendChild($label);
+				$fieldset->appendChild($text);
 
 			}
 			
@@ -215,14 +208,19 @@
 
 			// fetch existing table schema
 			$currentFilters = Symphony::Database()->fetchCol('Field',"SHOW COLUMNS FROM tbl_entries_data_{$orderFieldId} WHERE Field like 'field_%';");
-						
+			
 			//change the value format to match the filtered fields stored
 			foreach ($currentFilters as $key => $value) {
-				$currentFilters[$key] = substr($value, 6);
+				$currentFilter = substr($value, 6);
+				if (!empty($currentFilter)) {
+					$currentFilters[$key] = $currentFilter;
+				} else {
+					unset($currentFilters[$key]);
+				}
 			}
 
-			$newFilters = array_diff($filteredFields, $currentFilters);
-			$removedFilters = array_diff($currentFilters, $filteredFields);
+			$newFilters = array_filter(array_diff($filteredFields, $currentFilters));
+			$removedFilters = array_filter(array_diff($currentFilters, $filteredFields));
 
 			foreach ($removedFilters as $key => $field_id) {
 				Symphony::Database()->query("ALTER TABLE `tbl_entries_data_{$orderFieldId}` DROP COLUMN `field_{$field_id}`");
@@ -231,7 +229,6 @@
 			foreach ($newFilters as $key => $field_id) {
 				//maybe in the future fields can give supported filters until then using a varchar for flexibility
 				$fieldtype = "varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL";
-
 				Symphony::Database()->query("ALTER TABLE `tbl_entries_data_{$orderFieldId}` ADD COLUMN `field_{$field_id}`{$fieldtype}");
 			}
 
@@ -240,8 +237,20 @@
 				foreach ($filteredFields as $field_id) {
 					$fields .= ",`field_{$field_id}` ";
 				}
-				Symphony::Database()->query("ALTER TABLE `tbl_entries_data_{$orderFieldId}` DROP INDEX `unique`;");
-				Symphony::Database()->query("ALTER TABLE `tbl_entries_data_{$orderFieldId}` ADD UNIQUE `unique`(`entry_id` {$fields});");
+				try {
+					Symphony::Database()->query("ALTER TABLE `tbl_entries_data_{$orderFieldId}` DROP INDEX `unique`;");
+				} catch (Exception $ex) {
+					// ignore. This can fail if no index exists.
+					// See #73
+				}
+				if (!empty($fields)) {
+					try {
+						Symphony::Database()->query("ALTER TABLE `tbl_entries_data_{$orderFieldId}` ADD UNIQUE `unique`(`entry_id` {$fields});");
+					} catch (Exception $ex) {
+					// ignore. This can fail if no index exists.
+					// See #73 (Fix error when deselect a field for filtering and saving the section)
+					}
+				}
 			}
 		}
 
@@ -279,36 +288,62 @@
 			return Symphony::Database()->insert($fields, 'tbl_fields_' . $this->handle());
 		}
 
-		function displayPublishPanel(&$wrapper, $data = null, $flagWithError = null, $fieldnamePrefix = null, $fieldnamePostfix = null) {
+		function displayPublishPanel(XMLElement &$wrapper, $data = NULL, $flagWithError = NULL, $fieldnamePrefix = NULL, $fieldnamePostfix = NULL, $entry_id = NULL) {
 			$value = $this->getOrderValue($data);
-
-			$label = Widget::Label($this->get('label'));
-			if($this->get('required') != 'yes') $label->appendChild(new XMLElement('i', __('Optional')));
 
 			$max_position = Symphony::Database()->fetchRow(0, "SELECT max(value) AS max FROM tbl_entries_data_{$this->get('id')}");
 
-			$input = Widget::Input(
-				'fields' . $fieldnamePrefix . '[' . $this->get('element_name') . ']' . $fieldnamePostfix,
-				(strlen($value) !== 0 ? (string)$value : (string)++$max_position["max"]),
-				($this->get('hide') == 'yes') ? 'hidden' : 'text'
-			);
+			$inputs = new XMLElement('div');
+			$isHidden = $this->get('hide') == 'yes';
+			$label = Widget::Label($isHidden ? '' : $this->get('label'));
 
-			if($this->get('hide') != 'yes') {
-				$label->appendChild($input);
-				if($flagWithError != null) {
-					$wrapper->appendChild(Widget::wrapFormElementWithError($label, $flagWithError));
+			// If data is an array there must be filtered values
+			if (is_array($data) && !empty($data)){
+				foreach ($data as $col => $row) {
+					if (!is_array($row)){
+						$row = array($row);
+					}
+					foreach ($row as $key => $value) {
+						$input = Widget::Input(
+							'fields' . $fieldnamePrefix . '[' . $this->get('element_name') . '][' . $col . '][' . $key . ']' . $fieldnamePostfix,
+							(strlen($value) !== 0 || $col != 'value') ? (string)$value : (string)++$max_position["max"],
+							($isHidden  || $col != 'value') ? 'hidden' : 'text'
+						);
+						$inputs->appendChild($input);
+					}
 				}
-				else {
-					$wrapper->appendChild($label);
+				if ($isHidden) {
+					$wrapper->addClass('irrelevant');
 				}
+				$label->appendChild($inputs);
 			}
 			else {
-				$wrapper->addClass('irrelevant');
-				$wrapper->appendChild($input);
+				$input = Widget::Input(
+					'fields' . $fieldnamePrefix . '[' . $this->get('element_name') . ']' . $fieldnamePostfix,
+					(strlen($value) !== 0 ? (string)$value : (string)++$max_position["max"]),
+					($this->get('hide') == 'yes') ? 'hidden' : 'text'
+				);
+
+				if (!$isHidden) {
+					if ($this->get('required') != 'yes') {
+						$label->appendChild(new XMLElement('i', __('Optional')));
+					}
+				}
+				else {
+					$wrapper->addClass('irrelevant');
+				}
+				$label->appendChild($input);
+			}
+
+			if ($flagWithError != null) {
+				$wrapper->appendChild(Widget::Error($label, $flagWithError));
+			}
+			else {
+				$wrapper->appendChild($label);
 			}
 		}
 
-		public function displayDatasourceFilterPanel(&$wrapper, $data = null, $errors = null, $fieldnamePrefix = null, $fieldnamePostfix = null) {
+		public function displayDatasourceFilterPanel(XMLElement &$wrapper, $data = NULL, $errors = NULL, $fieldnamePrefix = NULL, $fieldnamePostfix = NULL) {
 			parent::displayDatasourceFilterPanel($wrapper, $data, $errors, $fieldnamePrefix, $fieldnamePostfix);
 
 			$text = new XMLElement('p', __('To filter by ranges, add <code>%s</code> to the beginning of the filter input. Use <code>%s</code> for field name. E.G. <code>%s</code>', array('mysql:', 'value', 'mysql: value &gt;= 1.01 AND value &lt;= {$price}')), array('class' => 'help'));
@@ -325,7 +360,13 @@
 			}
 
 			// Check type
-			if(strlen($data) > 0 && !is_numeric($data)) {
+			if(is_array($data) && is_array($data['value'])){
+				$numeric = array_filter($data['value'],'is_numeric');
+				if (sizeof($numeric) != sizeof($data['value'])){
+					$message = __('Must be a number.');
+					return self::__INVALID_FIELDS__;
+				}
+			} else if(strlen($data) > 0 && !is_numeric($data)) {
 				$message = __('Must be a number.');
 				return self::__INVALID_FIELDS__;
 			}
@@ -396,7 +437,7 @@
 			foreach ($filterableFields as $key => $filterable_field) {
 				if (isset($filters[$filterable_field])){
 					$where .= " AND {$prefix}field_{$filterable_field} = '{$filters[$filterable_field]}'";
-				} else {						
+				} else {
 					$where .= " AND {$prefix}field_{$filterable_field} is NULL";
 				}
 			}
@@ -409,7 +450,9 @@
 			$filterableFields = $this->get('filtered_fields');
 
 			//there are no filters to apply so should just be a single value
-			if (empty($filterableFields)) return $data['value'];
+			if (empty($filterableFields)) {
+				return $data['value'];
+			}
 
 			$filterableFields = explode(',', $filterableFields);
 			$section_id = $this->get('parent_section');
@@ -417,10 +460,14 @@
 			$orderEntriesExtension = ExtensionManager::create('order_entries');
 			$filters = $orderEntriesExtension->getFilters($filterableFields,$section_id);
 
+			// if there are no filter, bail out
+			if (empty($filterableFields)) {
+				return $data['value'];
+			}
 
 			if (!is_array($data['value'])){
 				foreach ($data as $key => $value) {
-					$data[$key] = array($value);
+					$data[$key] = array(strtolower(General::sanitize($value)));
 				}
 			}
 
@@ -448,7 +495,7 @@
 
 				if ( empty($keys) ){
 					//this view is not sorted
-					return 0;
+					return current($data['value']);
 				} else {
 					return $data['value'][current($keys)];
 				}
@@ -457,7 +504,7 @@
 			}
 		}
 
-		public function prepareTableValue($data, XMLElement $link = null) {
+		public function prepareTableValue($data, XMLElement $link = NULL, $entry_id = NULL) {
 
 			$orderValue = $this->getOrderValue($data);
 
@@ -474,7 +521,7 @@
 			$wrapper->appendChild(new XMLElement($this->get('element_name'), $this->getOrderValue($data) ));
 		}
 
-		public function getParameterPoolValue(Array $data) {
+		public function getParameterPoolValue(array $data, $entry_id = NULL) {
 			return $this->getOrderValue($data);
 		}
 

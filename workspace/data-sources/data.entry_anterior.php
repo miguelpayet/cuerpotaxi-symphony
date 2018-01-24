@@ -10,10 +10,13 @@ class datasourceentry_anterior extends SectionDatasource
     public $dsParamREDIRECTONEMPTY = 'no';
     public $dsParamREDIRECTONFORBIDDEN = 'no';
     public $dsParamREDIRECTONREQUIRED = 'no';
-    public $dsParamREQUIREDPARAM = 'handle';
     public $dsParamSORT = 'system:id';
     public $dsParamHTMLENCODE = 'no';
     public $dsParamASSOCIATEDENTRYCOUNTS = 'no';
+
+    public $dsParamFILTERS = array(
+        'system:id' => '{system:id}',
+    );
 
     public function __construct($env = null, $process_params = true)
     {
@@ -29,8 +32,8 @@ class datasourceentry_anterior extends SectionDatasource
                 'name' => 'Miguel Payet',
                 'website' => 'http://cuerpotaxi',
                 'email' => 'miguelpayet@gmail.com'),
-            'version' => 'Symphony 2.6.7',
-            'release-date' => '2016-11-03T03:07:57+00:00'
+            'version' => 'Symphony 2.7.0',
+            'release-date' => '2018-01-24T01:48:06+00:00'
         );
     }
 
@@ -48,14 +51,16 @@ class datasourceentry_anterior extends SectionDatasource
     {
         $result = new XMLElement($this->dsParamROOTELEMENT);
 
-        try{
+        try {
             $result = parent::execute($param_pool);
         } catch (FrontendPageNotFoundException $e) {
             // Work around. This ensures the 404 page is displayed and
             // is not picked up by the default catch() statement below
             FrontendPageNotFoundExceptionHandler::render($e);
         } catch (Exception $e) {
-            $result->appendChild(new XMLElement('error', $e->getMessage() . ' on ' . $e->getLine() . ' of file ' . $e->getFile()));
+            $result->appendChild(new XMLElement('error',
+                General::wrapInCDATA($e->getMessage() . ' on ' . $e->getLine() . ' of file ' . $e->getFile())
+            ));
             return $result;
         }
 

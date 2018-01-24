@@ -62,8 +62,6 @@ class fieldTextarea extends Field implements ExportableField, ImportableField
         }
 
         if ($validate === true) {
-            include_once(TOOLKIT . '/class.xsltprocess.php');
-
             if (!General::validateXML($result, $errors, false, new XsltProcess)) {
                 $result = html_entity_decode($result, ENT_QUOTES, 'UTF-8');
                 $result = $this->__replaceAmpersands($result);
@@ -363,6 +361,8 @@ class fieldTextarea extends Field implements ExportableField, ImportableField
 
         if (self::isFilterRegex($data[0])) {
             $this->buildRegexSQL($data[0], array('value'), $joins, $where);
+        } elseif (self::isFilterSQL($data[0])) {
+            $this->buildFilterSQL($data[0], array('value'), $joins, $where);
         } else {
             if (is_array($data)) {
                 $data = $data[0];

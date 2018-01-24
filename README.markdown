@@ -1,11 +1,14 @@
 # Symphony 2
 
-[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/symphonycms/symphony-2/badges/quality-score.png?b=integration)](https://scrutinizer-ci.com/g/symphonycms/symphony-2/?branch=master)
+[![Join the chat at https://gitter.im/symphonycms/symphony-2](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/symphonycms/symphony-2?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-- Version: 2.6.2
-- Date: 11th May 2015
-- [Release notes](http://getsymphony.com/download/releases/version/2.6.2/)
-- [Github repository](https://github.com/symphonycms/symphony-2/tree/2.6.2)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/symphonycms/symphony-2/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/symphonycms/symphony-2/?branch=master)
+
+- Version: 2.7.0
+- Date: 11th July 2017
+- [Release notes](http://getsymphony.com/download/releases/version/2.7.0/)
+- [Github repository](https://github.com/symphonycms/symphony-2/tree/2.7.0)
+- [MIT Licence](https://github.com/symphonycms/symphony-2/blob/master/LICENCE)
 
 ## Contents
 
@@ -23,7 +26,7 @@
 
 ## Overview
 
-Symphony is a `PHP` & `MySQL` based CMS that utilises `XML` and `XSLT` as its core technologies. This repository represents version `2.6.2` and is considered stable.
+Symphony is a `PHP` & `MySQL` based CMS that utilises `XML` and `XSLT` as its core technologies. This repository represents version `2.7.0` and is considered stable.
 
 Useful places:
 
@@ -34,7 +37,7 @@ Useful places:
 
 ## Server requirements
 
-- PHP 5.3 or above
+- PHP 5.3-5.6 or 7.0-7.1
 - PHP’s LibXML module, with the XSLT extension enabled (`--with-xsl`)
 - MySQL 5.5 or above is recommended
 - A webserver (known to be used with Apache, Litespeed, Nginx and Hiawatha)
@@ -206,3 +209,7 @@ Symphony uses [Grunt](http://gruntjs.com/) to build concatenated and minified as
 Symphony’s minified script and style files will be updated automatically when saving source files.
 
 More information: [Contributing to Symphony](https://github.com/symphonycms/symphony-2/wiki/Contributing-to-Symphony).
+
+## Responsible Security Disclosure
+
+Please follow [the guideline for security bug disclosure](https://github.com/symphonycms/symphony-2/wiki/Security-Bug-Disclosure).

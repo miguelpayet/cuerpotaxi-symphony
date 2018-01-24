@@ -50,9 +50,9 @@
             <xsl:value-of select="titulo"/>
         </h1>
         <div class="contenido" id="contenido">
-            <xsl:choose>
-                <xsl:when test="contenido">
-                    <xsl:copy-of select="texto/*"/>
+	        <xsl:copy-of select="texto/*"/>
+	        <!--xsl:choose>
+	            <xsl:when test="contenido">
                 </xsl:when>
                 <xsl:when test="imagen">
                     <script>imagen('<xsl:value-of select="$root"/>','<xsl:value-of select="concat(imagen/@path, imagen/filename)"/>');
@@ -61,7 +61,7 @@
                 <xsl:when test="video">
 
                 </xsl:when>
-            </xsl:choose>
+            </xsl:choose-->
         </div>
     </xsl:template>
 

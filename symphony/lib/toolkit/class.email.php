@@ -11,8 +11,6 @@ class EmailException extends Exception
 {
 }
 
-include_once TOOLKIT . '/class.emailgatewaymanager.php';
-
 /**
  * The Email class is a factory class to make it possible to send emails using different gateways.
  */
@@ -31,7 +29,7 @@ abstract class Email
      * @throws Exception
      * @return EmailGateway
      */
-    public function create($gateway = null)
+    public static function create($gateway = null)
     {
         $email_gateway_manager = new EmailGatewayManager;
 

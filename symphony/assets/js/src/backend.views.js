@@ -24,9 +24,12 @@ Symphony.View.add('/:context*:', function() {
 	// Fix for Webkit browsers to initially show the options. #2127
 	$('select[multiple=multiple]').scrollTop(0);
 
-	// Initialise tag lists inside duplicators
+	// Initialise plugins inside duplicators
 	Symphony.Elements.contents.find('.duplicator').on('constructshow.duplicator', '.instance', function() {
+		// Enable tag lists inside duplicators
 		$(this).find('.tags[data-interactive]').symphonyTags();
+		// Enable parameter suggestions
+		Symphony.Interface.Suggestions.init($(this), 'input[type="text"]');
 	});
 
 	// Navigation sizing
@@ -84,22 +87,25 @@ Symphony.View.add('/:context*:', function() {
 			handles: 'td'
 		})
 		.on('orderstart.orderable', function() {
-
 			// Store current sort order
-			oldSorting = $(this).find('input').map(function(e) { return this.name + '=' + (e + 1); }).get().join('&');
+			oldSorting = orderable.find('input').map(function(e) { return this.name + '=' + (e + 1); }).get().join('&');
 		})
 		.on('orderstop.orderable', function() {
 			var newSorting = orderable.find('input').map(function(e) { return this.name + '=' + (e + 1); }).get().join('&');
 
 			// Store sort order, if changed
-			orderable.addClass('busy');
 			if(oldSorting !== null && newSorting !== oldSorting) {
+				// Update UI
+				orderable.addClass('busy');
 
 				// Update items
 				orderable.trigger('orderupdate.admin');
 
+				// Update old value
+				oldSorting = newSorting;
+
 				// Add XSRF token
-				newSorting = newSorting + '&' + Symphony.Utilities.getXSRF(true);
+				newSorting += '&' + Symphony.Utilities.getXSRF(true);
 
 				// Send request
 				$.ajax({
@@ -113,9 +119,6 @@ Symphony.View.add('/:context*:', function() {
 						orderable.removeClass('busy').find('tr').removeClass('selected');
 					}
 				});
-			}
-			else {
-				orderable.removeClass('busy');
 			}
 		});
 
@@ -176,6 +179,21 @@ Symphony.View.add('/:context*:', function() {
 		if(option.is('.confirm')) {
 			return confirm(message);
 		}
+	});
+
+	// Timestamp validation overwrite
+	Symphony.Elements.header.find('.notifier .js-tv-overwrite').on('click.admin', function (e){
+		var action = $(this).attr('data-action') || 'save';
+		var hidden = Symphony.Elements.contents.find('input[name="action[ignore-timestamp]"]');
+		hidden.prop('checked', true);
+		e.preventDefault();
+		e.stopPropagation();
+		e.stopImmediatePropagation();
+		// Click on the action button:
+		// This is needed since we need to send the button's data in the POST
+		Symphony.Elements.contents.find('> form').find('input, button')
+			.filter('[name="action[' + action + ']"]').first().click();
+		return false;
 	});
 
 	// Catch all JavaScript errors and write them to the Symphony Log
@@ -606,6 +624,10 @@ Symphony.View.add('/blueprints/datasources/:action:/:id:/:status:/:*:', function
 				});
 			}
 		}, 500, nameChangeCount, current, value);
+	})
+	// Enable the default value for Data Source name
+	.symphonyDefaultValue({
+		sourceElement: context
 	});
 
 	// Update output parameters
@@ -677,7 +699,7 @@ Symphony.View.add('/blueprints/datasources/:action:/:id:/:status:/:*:', function
 	});
 
 	// Enable parameter suggestions
-	Symphony.Elements.contents.find('.filters-duplicator, .ds-param').each(function() {
+	Symphony.Elements.contents.find('.ds-param').each(function() {
 		Symphony.Interface.Suggestions.init(this, 'input[type="text"]');
 	});
 
@@ -735,6 +757,10 @@ Symphony.View.add('/blueprints/events/:action:/:name:/:status:/:*:', function() 
 				Symphony.Elements.contents.trigger('update.admin');
 			}
 		}, 500, nameChangeCount, current);
+	})
+	// Enable the default value for Event name
+	.symphonyDefaultValue({
+		sourceElement: context
 	});
 
 	// Change context

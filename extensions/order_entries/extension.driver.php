@@ -15,7 +15,7 @@
 			return array(
 				array(
 					'page' => '/backend/',
-					'delegate' => 'InitaliseAdminPageHead',
+					'delegate' => 'InitialiseAdminPageHead',
 					'callback' => 'prepareIndex'
 				),
 				array(
@@ -51,7 +51,7 @@
 			if (empty($filterableFields)) return array();
 
 			if (isset(Symphony::Engine()->Page)){
-				$context = Symphony::Engine()->Page->getContext();
+				$context = method_exists(Symphony::Engine()->Page, 'getContext') ? Symphony::Engine()->Page->getContext() : array();
 				$filters = $context['filters'];
 				if (!isset($filters)) $filters = array();
 
@@ -60,7 +60,7 @@
 					$filtered_field_id = FieldManager::fetchFieldIDFromElementName($field_name,$section_id);
 					if (in_array($filtered_field_id, $filterableFields)){
 						//ensuring that capitalization will never be an issue
-						$filters[$filtered_field_id] = strtolower($value);
+						$filters[$filtered_field_id] = strtolower(General::sanitize($value));
 					}
 					unset($filters[$field_name]);
 				}
@@ -73,6 +73,8 @@
 				foreach ($filters as $filtered_field_id => $value) {
 					if (!in_array($filtered_field_id, $filterableFields)){
 						unset($filters[$filtered_field_id]);
+					} else {
+						$filters[$filtered_field_id] = strtolower(General::sanitize($value));
 					}
 				}
 
@@ -103,7 +105,7 @@
 						$this->force_sort = $field->get('force_sort');
 						$this->field_id = $field->get('id');
 						$this->direction = $section->getSortingOrder();
-					
+
 						// Initialise manual ordering
 						$this->addComponents();
 						if ($field->get('disable_pagination') == 'yes'){
@@ -140,6 +142,26 @@
 						if($this->force_sort == 'yes') {
 							$table->setAttribute('data-order-entries-force', 'true');
 						}
+
+						$field = FieldManager::fetch($this->field_id);
+
+						if ($field && $field->get('show_column') == 'no'){
+
+							// sort order is not provided by field, so add manually
+							$tbody = $table->getChildByName('tbody',0);
+
+							//not looping as only the first row is required for sorting and is far more efficient
+							$tr = $tbody->getChildByName('tr',0);
+
+								$entry_id = str_replace('id-', '', $tr->getAttribute('id'));
+
+								if ($entry_id){
+									$entry = current(EntryManager::fetch($entry_id));
+									$data = $entry->getData($this->field_id);
+									$order = $field->getParameterPoolValue($data);
+									$tr->setAttribute('data-order',$order);
+								}
+						}
 						
 						break;
 					}
@@ -151,14 +173,6 @@
 		 * Add components for manual entry ordering
 		 */
 		public function addComponents() {
-
-			// get pagination data
-			$pagination = array(
-				'max-rows' => Symphony::Configuration()->get('pagination_maximum_rows', 'symphony'),
-				'current' => (isset($_REQUEST['pg']) && is_numeric($_REQUEST['pg']) ? max(1, intval($_REQUEST['pg'])) : 1)
-			);
-
-
 			// get filter data
 			$filters = $_REQUEST['filter'];
 			if (is_array($filters)){
@@ -168,16 +182,18 @@
 				}
 			}
 
-			// add pagination and filter data into symphony context if Symphony does not provide it
-			Administration::instance()->Page->addElementToHead(
-				new XMLElement(
-					'script', 
-					'if (! Symphony.Context.get(\'env\').pagination) Symphony.Context.get(\'env\').pagination='.json_encode($pagination).';' .
-					'if (! Symphony.Context.get(\'env\').filters) Symphony.Context.get(\'env\').filters='.json_encode($generatedFilters).';'
-					, array(
-						'type' => 'text/javascript'
-					)
-				)
+			// add pagination and filter data on the form element
+			Administration::instance()->Page->Form->setAttribute(
+				'data-order-entries-filter',
+				empty($generatedFilters) ? '' : json_encode($generatedFilters)
+			);
+			Administration::instance()->Page->Form->setAttribute(
+				'data-order-entries-pagination-max-rows',
+				Symphony::Configuration()->get('pagination_maximum_rows', 'symphony')
+			);
+			Administration::instance()->Page->Form->setAttribute(
+				'data-order-entries-pagination-current',
+				(isset($_REQUEST['pg']) && is_numeric($_REQUEST['pg']) ? max(1, intval($_REQUEST['pg'])) : 1)
 			);
 
 			Administration::instance()->Page->addScriptToHead(
@@ -212,7 +228,7 @@
 		/**
 		 * {@inheritDoc}
 		 */
-		public function update($previousVersion) {
+		public function update($previousVersion = false) {
 			$status = array();
 
 			// Prior version 1.6
@@ -247,12 +263,11 @@
 				$status[] = Symphony::Database()->query("
 					ALTER TABLE `tbl_fields_order_entries`
 					ADD `filtered_fields` varchar(255) DEFAULT NULL
-					DEFAULT NULL
 				");
 
 				$fields =  Symphony::Database()->fetchCol('field_id',"SELECT field_id FROM `tbl_fields_order_entries`");
 
-				foreach ($fields as $key => $field) {					
+				foreach ($fields as $key => $field) {
 					$status[] = Symphony::Database()->query("
 						ALTER TABLE `tbl_entries_data_{$field}`
 						DROP INDEX `entry_id`

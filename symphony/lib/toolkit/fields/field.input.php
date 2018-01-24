@@ -197,8 +197,6 @@ class FieldInput extends Field implements ExportableField, ImportableField
         if ($encode === true) {
             $value = General::sanitize($value);
         } else {
-            include_once TOOLKIT . '/class.xsltprocess.php';
-
             if (!General::validateXML($data['value'], $errors, false, new XsltProcess)) {
                 $value = html_entity_decode($data['value'], ENT_QUOTES, 'UTF-8');
                 $value = $this->__replaceAmpersands($value);
@@ -299,6 +297,8 @@ class FieldInput extends Field implements ExportableField, ImportableField
 
         if (self::isFilterRegex($data[0])) {
             $this->buildRegexSQL($data[0], array('value', 'handle'), $joins, $where);
+        } elseif (self::isFilterSQL($data[0])) {
+            $this->buildFilterSQL($data[0], array('value', 'handle'), $joins, $where);
         } elseif ($andOperation) {
             foreach ($data as $value) {
                 $this->_key++;
@@ -348,7 +348,7 @@ class FieldInput extends Field implements ExportableField, ImportableField
 
     public function buildSortingSQL(&$joins, &$where, &$sort, $order = 'ASC')
     {
-        if (in_array(strtolower($order), array('random', 'rand'))) {
+        if ($this->isRandomOrder($order)) {
             $sort = 'ORDER BY RAND()';
         } else {
             $sort = sprintf(
@@ -362,6 +362,11 @@ class FieldInput extends Field implements ExportableField, ImportableField
                 $order
             );
         }
+    }
+
+    public function buildSortingSelectSQL($sort, $order = 'ASC')
+    {
+        return null;
     }
 
     /*-------------------------------------------------------------------------
