@@ -83,10 +83,8 @@ class datasourceentry_anterior extends SectionDatasource
         }
         $fecha = $resFecha[0]["creation_date"];
 
-        $handleanterior = $this->obtenerHandleAnterior($fecha);
-        $handleposterior = $this->obtenerHandlePosterior($fecha);
-        $vecinos = new XMLElement("vecinos", null, array("anterior" => $handleanterior, "posterior" => $handleposterior));
-        $result->appendChild($vecinos);
+        $this->obtenerAnterior($fecha, $result);
+        $this->obtenerPosterior($fecha, $result);
         return $result;
     }
 
@@ -108,36 +106,40 @@ class datasourceentry_anterior extends SectionDatasource
         );
     }
 
-    private function obtenerHandleAnterior($fecha)
+    private function obtenerAnterior($fecha, $result)
     {
-        return $this->obtenerHandle($fecha, "max", "<");
+        return $this->obtenerHandle($fecha, "max", "<", $result);
     }
 
-    private function obtenerHandle($fecha, $funcion, $comparador)
+    private function obtenerHandle($fecha, $funcion, $comparador, $result)
     {
         $sqlDate = "select " . $funcion . "(creation_date) as valor from sym_entries where creation_date" . $comparador . "'" . $fecha . "'";
         if (!$resDate = Symphony::Database()->fetch($sqlDate)) {
-            return "";
+            return;
         }
         $fechaVecino = $resDate[0]["valor"];
         $sqlId = "select max(id) as valor from sym_entries where creation_date = '" . $fechaVecino . "'";
         if (!$resId = Symphony::Database()->fetch($sqlId)) {
-            return "";
+            return;
         }
         $id = $resId[0]["valor"];
         if (!$id) {
-            return NULL;
+            return;
         }
-        $sqlHandle = "select d.handle as nombre from sym_entries_data_1 d where entry_id=" . $id . ";";
+        $sqlHandle = "select d.handle as handle, d.value as titulo from sym_entries_data_1 d where entry_id=" . $id . ";";
         if (!$resHnd = Symphony::Database()->fetch($sqlHandle)) {
-            return "";
+            return;
         }
-        return $resHnd[0]["nombre"];
+        $vecinos = new XMLElement("vecino", null, array("posicion" => "anterior"));
+        $vecinos->appendChild(new XMLElement("handle", $resHnd[0]["handle"], array()));
+        $vecinos->appendChild(new XMLElement("titulo", $resHnd[0]["titulo"], array()));
+        $result->appendChild($vecinos);
+        return;
     }
 
-    private function obtenerHandlePosterior($fecha)
+    private function obtenerPosterior($fecha, $result)
     {
-        return $this->obtenerHandle($fecha, "min", ">");
+        return $this->obtenerHandle($fecha, "min", ">", $result);
     }
 
 }

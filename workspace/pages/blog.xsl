@@ -50,9 +50,9 @@
             <xsl:value-of select="titulo"/>
         </h1>
         <div class="contenido" id="contenido">
-	        <xsl:copy-of select="texto/*"/>
-	        <!--xsl:choose>
-	            <xsl:when test="contenido">
+            <xsl:copy-of select="texto/*"/>
+            <!--xsl:choose>
+                <xsl:when test="contenido">
                 </xsl:when>
                 <xsl:when test="imagen">
                     <script>imagen('<xsl:value-of select="$root"/>','<xsl:value-of select="concat(imagen/@path, imagen/filename)"/>');
@@ -79,19 +79,22 @@
     </xsl:template>
 
     <xsl:template match="/data/entries/entry" mode="paginator">
-        <xsl:variable name="myid" select="@id"/>
-        <xsl:apply-templates select="/data/entries-todos/entry[@id &lt; $myid][1]">
-            <xsl:with-param name="texto">Anterior</xsl:with-param>
-        </xsl:apply-templates>
-        <xsl:apply-templates select="/data/entries-todos/entry[@id &gt; $myid][last()]">
-            <xsl:with-param name="texto">Siguiente</xsl:with-param>
-        </xsl:apply-templates>
+        <xsl:if test="/data/entry-anterior/vecino[@posicion='anterior']">
+            <xsl:apply-templates select="/data/entry-anterior/vecino[@posicion='anterior']">
+                <xsl:with-param name="texto">Anterior</xsl:with-param>
+            </xsl:apply-templates>
+        </xsl:if>
+        <xsl:if test="/data/entry-anterior/vecino[@posicion='posterior']">
+            <xsl:apply-templates select="/data/entry-anterior/vecino[@posicion='posterior']">
+                <xsl:with-param name="texto">Siguiente</xsl:with-param>
+            </xsl:apply-templates>
+        </xsl:if>
     </xsl:template>
 
-    <xsl:template match="/data/entries-todos/entry">
+    <xsl:template match="/data/entry-anterior/vecino">
         <xsl:param name="texto"/>
         <p>
-            <a href="{$root}/{titulo/@handle}">
+            <a href="{$root}/{handle}">
                 <xsl:value-of select="$texto"/>&#58;&#160;<xsl:value-of select="titulo"/>
             </a>
         </p>
